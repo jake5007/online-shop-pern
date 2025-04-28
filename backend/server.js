@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import path from "path";
 
 import productRoutes from "./routes/productRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
 import { sql } from "./config/db.js";
 import { aj } from "./lib/arcjet.js";
 import { createCategories, createProducts } from "./schema/index.js";
@@ -71,6 +72,7 @@ app.use(async (req, res, next) => {
   }
 });
 
+app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
 
 if (process.env.NODE_ENV === "production") {

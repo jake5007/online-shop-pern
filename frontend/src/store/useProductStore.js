@@ -7,6 +7,7 @@ const BASE_URL =
 
 export const useProductStore = create((set, get) => ({
   products: [],
+  categories: [],
   loading: false,
   error: null,
   currentProduct: null,
@@ -23,11 +24,27 @@ export const useProductStore = create((set, get) => ({
   totalCount: 0,
   hasMore: true,
   limit: 6,
+
+  //filter
+  filters: {
+    category_id: "",
+    minPrice: "",
+    maxPrice: "",
+  },
+
   showScrollTop: false,
-  setShowScrollTop: (showScrollTop) => set({ showScrollTop }),
+
   setOffset: (offset) => set({ offset }),
   setTotalCount: (totalCount) => set({ totalCount }),
   setHasMore: (hasMore) => set({ hasMore }),
+  setShowScrollTop: (showScrollTop) => set({ showScrollTop }),
+  setFilters: (filters) =>
+    set({
+      filters: { ...get().filters, ...filters },
+      offset: 0,
+      products: [],
+      hasMore: true,
+    }),
 
   setFormData: (formData) => set({ formData }),
   resetForm: () => set({ formData: { name: "", price: "", image: "" } }),
@@ -48,14 +65,30 @@ export const useProductStore = create((set, get) => ({
       set({ loading: false });
     }
   },
-
+  fetchCategories: async () => {
+    try {
+      const res = await axios.get(`${BASE_URL}/api/categories`);
+      set({ categories: res.data.data, error: null });
+    } catch (err) {
+      console.log("Error fetching categories: ", err);
+      set({ categories: [], error: "Something went wrong" });
+    }
+  },
   fetchProducts: async () => {
     set({ loading: true });
+    const { limit, offset, products, filters } = get();
+    const { category_id, minPrice, maxPrice } = filters;
+
     try {
-      const { limit, offset, products } = get();
-      const res = await axios.get(
-        `${BASE_URL}/api/products?limit=${limit}&offset=${offset}`
-      );
+      const res = await axios.get(`${BASE_URL}/api/products`, {
+        params: {
+          limit,
+          offset,
+          category_id,
+          minPrice,
+          maxPrice,
+        },
+      });
       const { data: newProducts, totalCount } = res.data;
       set({
         products: [...products, ...newProducts],

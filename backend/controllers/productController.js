@@ -3,16 +3,29 @@ import { sql } from "../config/db.js";
 export const getProducts = async (req, res) => {
   const limit = parseInt(req.query.limit) || 6;
   const offset = parseInt(req.query.offset) || 0;
+  const { category_id, minPrice, maxPrice } = req.query;
+
+  let where = sql`WHERE 1=1`;
+  if (category_id) {
+    where = sql`${where} AND category_id = ${category_id}`;
+  }
+  if (minPrice) {
+    where = sql`${where} AND price >= ${minPrice}`;
+  }
+  if (maxPrice) {
+    where = sql`${where} AND price <= ${maxPrice}`;
+  }
 
   try {
     const [products, [{ count }]] = await Promise.all([
       sql`
         SELECT * FROM products
+        ${where}
         ORDER BY created_at DESC
         LIMIT ${limit} OFFSET ${offset}
       `,
       sql`
-        SELECT COUNT(*)::int AS count FROM products
+        SELECT COUNT(*)::int AS count FROM products ${where}
       `,
     ]);
 

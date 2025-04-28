@@ -6,7 +6,7 @@ import {
   PlusCircleIcon,
   RefreshCwIcon,
 } from "lucide-react";
-import { ProductCard, AddProductModal } from "../components";
+import { ProductCard, AddProductModal, Filter } from "../components";
 
 const HomePage = () => {
   const {
@@ -66,9 +66,12 @@ const HomePage = () => {
           <PlusCircleIcon className="size-5 mr-2" />
           Add Product
         </button>
-        <button className="btn btn-ghost btn-circle" onClick={fetchProducts}>
-          <RefreshCwIcon className="size-5" />
-        </button>
+        <div className="flex items-center space-x-4">
+          <Filter />
+          <button className="btn btn-ghost btn-circle" onClick={fetchProducts}>
+            <RefreshCwIcon className="size-5" />
+          </button>
+        </div>
       </div>
 
       <AddProductModal />
@@ -113,10 +116,11 @@ const HomePage = () => {
       }
 
       {/* Current count of products */}
-      <div className="text-center text-gray-500 mt-4">
-        {products.length} / {totalCount} items loaded
-      </div>
-
+      {!loading && (
+        <div className="text-center text-gray-500 mt-4">
+          {products.length} / {totalCount} items loaded
+        </div>
+      )}
       {/* No more products message */}
       {!loading && !hasMore && (
         <div className="text-center text-green-500 font-semibold mt-6">
