@@ -1,15 +1,25 @@
 import { sql } from "../config/db.js";
 
 export const getProducts = async (req, res) => {
+  const limit = parseInt(req.query.limit) || 6;
+  const offset = parseInt(req.query.offset) || 0;
+
   try {
-    const products = await sql`
+    const [products, [{ count }]] = await Promise.all([
+      sql`
         SELECT * FROM products
         ORDER BY created_at DESC
-      `;
+        LIMIT ${limit} OFFSET ${offset}
+      `,
+      sql`
+        SELECT COUNT(*)::int AS count FROM products
+      `,
+    ]);
 
     res.status(200).json({
       success: true,
       data: products,
+      totalCount: count,
     });
   } catch (error) {
     console.log("Error getting products: ", error);

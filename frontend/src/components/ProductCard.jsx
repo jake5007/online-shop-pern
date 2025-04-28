@@ -1,8 +1,9 @@
+import { forwardRef } from "react";
 import { EditIcon, Trash2Icon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useProductStore } from "../store/useProductStore";
 
-function ProductCard({ product }) {
+const ProductCard = forwardRef(({ product }, ref) => {
   const { deleteProduct } = useProductStore();
 
   const handleDelete = () => {
@@ -10,8 +11,12 @@ function ProductCard({ product }) {
       deleteProduct(product.id);
     }
   };
+
   return (
-    <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300">
+    <div
+      ref={ref}
+      className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300"
+    >
       {/* Product Image */}
       <figure className="relative pt-[56.25%]">
         <img
@@ -47,5 +52,5 @@ function ProductCard({ product }) {
       </div>
     </div>
   );
-}
+});
 export default ProductCard;

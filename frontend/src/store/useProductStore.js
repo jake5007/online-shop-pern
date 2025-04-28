@@ -17,6 +17,18 @@ export const useProductStore = create((set, get) => ({
     price: "",
     image: "",
   },
+
+  // offset, totalCount, and hasMore state
+  offset: 0,
+  totalCount: 0,
+  hasMore: true,
+  limit: 6,
+  showScrollTop: false,
+  setShowScrollTop: (showScrollTop) => set({ showScrollTop }),
+  setOffset: (offset) => set({ offset }),
+  setTotalCount: (totalCount) => set({ totalCount }),
+  setHasMore: (hasMore) => set({ hasMore }),
+
   setFormData: (formData) => set({ formData }),
   resetForm: () => set({ formData: { name: "", price: "", image: "" } }),
   addProduct: async (e) => {
@@ -40,8 +52,18 @@ export const useProductStore = create((set, get) => ({
   fetchProducts: async () => {
     set({ loading: true });
     try {
-      const res = await axios.get(`${BASE_URL}/api/products`);
-      set({ products: res.data.data, error: null });
+      const { limit, offset, products } = get();
+      const res = await axios.get(
+        `${BASE_URL}/api/products?limit=${limit}&offset=${offset}`
+      );
+      const { data: newProducts, totalCount } = res.data;
+      set({
+        products: [...products, ...newProducts],
+        offset: offset + limit,
+        hasMore: newProducts.length < limit ? false : true,
+        totalCount,
+        error: null,
+      });
     } catch (err) {
       if (err.status == 429)
         set({

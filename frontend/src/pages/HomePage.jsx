@@ -1,19 +1,61 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useProductStore } from "../store/useProductStore";
-import { PackageIcon, PlusCircleIcon, RefreshCwIcon } from "lucide-react";
+import {
+  ArrowBigUp,
+  PackageIcon,
+  PlusCircleIcon,
+  RefreshCwIcon,
+} from "lucide-react";
 import { ProductCard, AddProductModal } from "../components";
 
-function HomePage() {
-  const { products, loading, error, fetchProducts } = useProductStore();
+const HomePage = () => {
+  const {
+    products,
+    loading,
+    error,
+    fetchProducts,
+    totalCount,
+    hasMore,
+    showScrollTop,
+    setShowScrollTop,
+  } = useProductStore();
+  const observer = useRef();
+
+  const lastProductElementRef = (node) => {
+    if (loading) return;
+    if (observer.current) observer.current.disconnect();
+
+    observer.current = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasMore) {
+        fetchProducts();
+      }
+    });
+
+    if (node) observer.current.observe(node);
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
 
-  console.log("Products: ", products);
+    const handleScroll = () => {
+      if (window.scrollY > 500) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [fetchProducts, setShowScrollTop]);
 
   return (
-    <main className="max-w-6xl mx-auto px-4 py-8 ">
+    <main className="max-w-6xl mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-10">
         <button
           className="btn btn-primary rounded-full"
@@ -48,18 +90,50 @@ function HomePage() {
         </div>
       )}
 
-      {loading ? (
+      {/* Loading */}
+      {loading && (
         <div className="flex justify-center items-center h-64">
           <div className="loading loading-dots loading-xl" />
         </div>
-      ) : (
+      )}
+
+      {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {products.map((product, idx) => {
+            const isLast = idx === products.length - 1;
+            return (
+              <ProductCard
+                key={product.id}
+                ref={isLast ? lastProductElementRef : null}
+                product={product}
+              />
+            );
+          })}
         </div>
+      }
+
+      {/* Current count of products */}
+      <div className="text-center text-gray-500 mt-4">
+        {products.length} / {totalCount} items loaded
+      </div>
+
+      {/* No more products message */}
+      {!loading && !hasMore && (
+        <div className="text-center text-green-500 font-semibold mt-6">
+          🎉 No more products to load!
+        </div>
+      )}
+
+      {/* To the top btn */}
+      {showScrollTop && (
+        <button
+          onClick={scrollToTop}
+          className="btn btn-circle btn-primary fixed bottom-8 right-8 shadow-xl opacity-60 hover:opacity-100 transition-opacity duration-300"
+        >
+          <ArrowBigUp className="size-8" />
+        </button>
       )}
     </main>
   );
-}
+};
 export default HomePage;
