@@ -2,14 +2,21 @@ import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
 import cors from "cors";
+import csrf from "csurf";
+import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import path from "path";
 
 import productRoutes from "./routes/productRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import { sql } from "./config/db.js";
 import { aj } from "./lib/arcjet.js";
-import { createCategories, createProducts } from "./schema/index.js";
+import {
+  createCategories,
+  createProducts,
+  createUsers,
+} from "./schema/index.js";
 import { create } from "domain";
 
 dotenv.config();
@@ -17,15 +24,31 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const __dirname = path.resolve();
+const csrfProtection = csrf({
+  cookie: true,
+});
+
+const allowedOrigins = {
+  development: ["http://localhost:5173"],
+  production: [""],
+};
+//production: https://online-shop-pern.onrender.com/
 
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: allowedOrigins[process.env.NODE_ENV],
+    credentials: true,
+  })
+);
 app.use(
   helmet({
     contentSecurityPolicy: false,
   })
 );
 app.use(morgan("dev"));
+app.use(cookieParser());
+app.use(csrfProtection);
 
 // arcjet for all routes
 app.use(async (req, res, next) => {
@@ -74,6 +97,11 @@ app.use(async (req, res, next) => {
 
 app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/auth", authRoutes);
+
+app.get("/api/csrf-token", (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
 
 if (process.env.NODE_ENV === "production") {
   // server our react app
@@ -88,6 +116,7 @@ async function initDB() {
   try {
     await createCategories(sql);
     await createProducts(sql);
+    await createUsers(sql);
 
     console.log("Database initialized successfully");
   } catch (error) {

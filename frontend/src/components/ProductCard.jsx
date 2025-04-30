@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { useProductStore } from "../store/useProductStore";
 import Rating from "./Rating";
 
-const ProductCard = forwardRef(({ product }, ref) => {
+const ProductCard = forwardRef(({ product, isAdmin }, ref) => {
   const { deleteProduct } = useProductStore();
 
   const handleDelete = () => {
@@ -38,21 +38,23 @@ const ProductCard = forwardRef(({ product }, ref) => {
         </p>
 
         {/* CARD ACTIONS */}
-        <div className="card-actions justify-end items-center mt-4">
-          <Link
-            to={`/product/${product.id}`}
-            className="btn btn-sm btn-info btn-outline"
-          >
-            <EditIcon className="size-4" />
-          </Link>
+        {isAdmin && (
+          <div className="card-actions justify-end items-center mt-4">
+            <Link
+              to={`/product/${product.id}`}
+              className="btn btn-sm btn-info btn-outline"
+            >
+              <EditIcon className="size-4" />
+            </Link>
 
-          <button
-            className="btn btn-sm btn-error btn-outline"
-            onClick={handleDelete}
-          >
-            <Trash2Icon className="size-4" />
-          </button>
-        </div>
+            <button
+              className="btn btn-sm btn-error btn-outline"
+              onClick={handleDelete}
+            >
+              <Trash2Icon className="size-4" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

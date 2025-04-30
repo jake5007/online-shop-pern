@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useProductStore } from "../store/useProductStore";
+import { useAuthStore } from "../store/useAuthStore";
 import {
   ArrowBigUp,
   PackageIcon,
@@ -19,6 +20,7 @@ const HomePage = () => {
     showScrollTop,
     setShowScrollTop,
   } = useProductStore();
+  const user = useAuthStore((state) => state.user);
   const observer = useRef();
 
   const lastProductElementRef = (node) => {
@@ -57,16 +59,19 @@ const HomePage = () => {
   return (
     <main className="max-w-6xl mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-10">
-        <button
-          className="btn btn-primary rounded-full"
-          onClick={() =>
-            document.getElementById("add_product_modal").showModal()
-          }
-        >
-          <PlusCircleIcon className="size-5 mr-2" />
-          Add Product
-        </button>
-        <div className="flex items-center space-x-4">
+        {user?.is_admin && (
+          <button
+            className="btn btn-primary rounded-full"
+            onClick={() =>
+              document.getElementById("add_product_modal").showModal()
+            }
+          >
+            <PlusCircleIcon className="size-5 mr-2" />
+            Add Product
+          </button>
+        )}
+
+        <div className="flex items-center space-x-4 ml-auto">
           <Filter />
           <button className="btn btn-ghost btn-circle" onClick={fetchProducts}>
             <RefreshCwIcon className="size-5" />
@@ -85,10 +90,12 @@ const HomePage = () => {
           </div>
           <div className="text-center space-y-2">
             <h3 className="text-2xl font-semibold">No Products Found</h3>
-            <p className="text-gray-500 max-w-sm">
-              Get started by adding your first product. Click the button above
-              to add a new product to your store.
-            </p>
+            {user?.is_admin && (
+              <p className="text-gray-500 max-w-sm">
+                Get started by adding your first product. Click the button above
+                to add a new product to your store.
+              </p>
+            )}
           </div>
         </div>
       )}
@@ -109,6 +116,7 @@ const HomePage = () => {
                 key={product.id}
                 ref={isLast ? lastProductElementRef : null}
                 product={product}
+                isAdmin={user?.is_admin}
               />
             );
           })}
@@ -123,7 +131,7 @@ const HomePage = () => {
       )}
       {/* No more products message */}
       {!loading && !hasMore && (
-        <div className="text-center text-green-500 font-semibold mt-6">
+        <div className="text-center font-semibold mt-6">
           🎉 No more products to load!
         </div>
       )}

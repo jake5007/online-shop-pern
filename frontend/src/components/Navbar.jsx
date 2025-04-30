@@ -1,13 +1,25 @@
-import { Link, useResolvedPath } from "react-router-dom";
-import { ShoppingCartIcon, ShoppingBagIcon } from "lucide-react";
+import { Link, useResolvedPath, useNavigate } from "react-router-dom";
+import {
+  ShoppingCartIcon,
+  ShoppingBagIcon,
+  LogOutIcon,
+  LogInIcon,
+} from "lucide-react";
 import ThemeSelector from "./ThemeSelector";
 import { useProductStore } from "../store/useProductStore";
+import { useAuthStore } from "../store/useAuthStore";
 
 function Navbar() {
+  const { user, logout } = useAuthStore();
+  const { products } = useProductStore();
+  const navigate = useNavigate();
   const { pathname } = useResolvedPath();
   const isHomePage = pathname === "/";
 
-  const { products } = useProductStore();
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login", { replace: true });
+  };
 
   return (
     <div className="bg-base-100/80 backdrop-blur-lg border-b border-base-content/10 sticky top-0 z-50">
@@ -29,6 +41,23 @@ function Navbar() {
           </div>
           {/* Right side */}
           <div className="flex items-center gap-4">
+            {user ? (
+              <>
+                <span className="text-sm truncate max-w-[150px] hidden sm:block">
+                  Welcome, <b>{user.name}</b>
+                </span>
+                <button
+                  className="btn btn-ghost btn-circle"
+                  onClick={handleLogout}
+                >
+                  <LogOutIcon className="size-5" />
+                </button>
+              </>
+            ) : (
+              <Link to="/login" className="btn btn-ghost btn-circle">
+                <LogInIcon className="size-5" />
+              </Link>
+            )}
             <ThemeSelector />
             {isHomePage && (
               <div className="indicator">
