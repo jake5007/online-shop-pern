@@ -1,8 +1,11 @@
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 
-function Rating({ value, numReviews }) {
+const Rating = ({ value, numReviews }) => {
   return (
     <div className="rating items-center gap-0.5">
+      <span className={`font-semibold text-secondary ${value && "mr-2"}`}>
+        {value?.toFixed(2)}
+      </span>
       <span>
         {value >= 1 ? (
           <FaStar className="text-yellow-400" />
@@ -49,9 +52,9 @@ function Rating({ value, numReviews }) {
         )}
       </span>
       <span className="rating-text ml-2">
-        {numReviews > 0 ? `${numReviews} reviews` : "No reviews"}
+        ( {numReviews > 0 ? `${numReviews} reviews` : "No reviews"} )
       </span>
     </div>
   );
-}
+};
 export default Rating;

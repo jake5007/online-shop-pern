@@ -141,6 +141,7 @@ export const logoutUser = async (req, res) => {
 
 export const getMe = async (req, res) => {
   const user = req.user;
+  console.log("User from getMe: ", user);
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }

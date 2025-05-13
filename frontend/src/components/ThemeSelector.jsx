@@ -2,7 +2,7 @@ import { PaletteIcon } from "lucide-react";
 import { THEMES } from "../constants";
 import { useThemeStore } from "../store/useThemeStore";
 
-function ThemeSelector() {
+const ThemeSelector = () => {
   const { theme: currTheme, setTheme: setCurrTheme } = useThemeStore();
 
   return (
@@ -46,5 +46,5 @@ function ThemeSelector() {
       </div>
     </div>
   );
-}
+};
 export default ThemeSelector;

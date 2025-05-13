@@ -1,9 +1,10 @@
 import { create } from "zustand";
-import axiosInstance from "../utils/axios";
 import toast from "react-hot-toast";
+import axiosInstance from "../utils/axios";
+import { useCartStore } from "./useCartStore";
 
-const BASE_URL =
-  import.meta.env.MODE === "development" ? "http://localhost:3000" : "";
+// const BASE_URL =
+//   import.meta.env.MODE === "development" ? "http://localhost:3000" : "";
 
 export const useAuthStore = create((set) => ({
   user: null,
@@ -17,7 +18,7 @@ export const useAuthStore = create((set) => ({
       const { data } = await axiosInstance.get("/api/csrf-token");
       localStorage.setItem("csrfToken", data.csrfToken);
 
-      const res = await axiosInstance.post(`${BASE_URL}/api/auth/register`, {
+      const res = await axiosInstance.post("/api/auth/register", {
         name,
         email,
         password,
@@ -40,7 +41,7 @@ export const useAuthStore = create((set) => ({
       const { data } = await axiosInstance.get("/api/csrf-token");
       localStorage.setItem("csrfToken", data.csrfToken);
 
-      const res = await axiosInstance.post(`${BASE_URL}/api/auth/login`, {
+      const res = await axiosInstance.post("/api/auth/login", {
         email,
         password,
       });
@@ -57,9 +58,15 @@ export const useAuthStore = create((set) => ({
   },
   logout: async () => {
     try {
-      await axiosInstance.post(`${BASE_URL}/api/auth/logout`);
+      const { data } = await axiosInstance.get("/api/csrf-token");
+      localStorage.setItem("csrfToken", data.csrfToken);
+
+      await axiosInstance.post("/api/auth/logout");
+
       set({ user: null });
       localStorage.removeItem("csrfToken");
+      useCartStore.getState().resetCart(); // Reset cart state on logout
+
       toast.success("User logged out successfully");
     } catch (err) {
       console.error("Logout error: ", err);
@@ -69,7 +76,7 @@ export const useAuthStore = create((set) => ({
   // for recovering user data after page refresh
   fetchUser: async () => {
     try {
-      const res = await axiosInstance.get(`${BASE_URL}/api/auth/me`);
+      const res = await axiosInstance.get("/api/auth/me");
       set({ user: res.data.user });
     } catch (err) {
       console.error("Fetch user error: ", err);

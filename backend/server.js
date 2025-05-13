@@ -7,15 +7,21 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import path from "path";
 
-import productRoutes from "./routes/productRoutes.js";
-import categoryRoutes from "./routes/categoryRoutes.js";
-import authRoutes from "./routes/authRoutes.js";
+import {
+  productRoutes,
+  categoryRoutes,
+  authRoutes,
+  cartRoutes,
+  orderRoutes,
+} from "./routes/index.js";
 import { sql } from "./config/db.js";
 import { aj } from "./lib/arcjet.js";
 import {
   createCategories,
   createProducts,
   createUsers,
+  createCarts,
+  createOrders,
 } from "./schema/index.js";
 import { create } from "domain";
 
@@ -98,6 +104,8 @@ app.use(async (req, res, next) => {
 app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/carts", cartRoutes);
+app.use("/api/orders", orderRoutes);
 
 app.get("/api/csrf-token", (req, res) => {
   res.json({ csrfToken: req.csrfToken() });
@@ -117,6 +125,8 @@ async function initDB() {
     await createCategories(sql);
     await createProducts(sql);
     await createUsers(sql);
+    await createCarts(sql);
+    await createOrders(sql);
 
     console.log("Database initialized successfully");
   } catch (error) {

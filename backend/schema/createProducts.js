@@ -10,6 +10,7 @@ export async function createProducts(sql) {
                 description TEXT,
                 image VARCHAR(255) NOT NULL,
                 price NUMERIC(10, 2) NOT NULL,
+                is_deleted BOOLEAN DEFAULT FALSE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )

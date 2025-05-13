@@ -1,17 +1,17 @@
 import { Link, useResolvedPath, useNavigate } from "react-router-dom";
 import {
-  ShoppingCartIcon,
+  StoreIcon,
   ShoppingBagIcon,
   LogOutIcon,
   LogInIcon,
 } from "lucide-react";
 import ThemeSelector from "./ThemeSelector";
-import { useProductStore } from "../store/useProductStore";
 import { useAuthStore } from "../store/useAuthStore";
+import { useCartStore } from "../store/useCartStore";
 
-function Navbar() {
+const Navbar = () => {
   const { user, logout } = useAuthStore();
-  const { products } = useProductStore();
+  const totalQuantity = useCartStore((state) => state.totalQuantity);
   const navigate = useNavigate();
   const { pathname } = useResolvedPath();
   const isHomePage = pathname === "/";
@@ -29,12 +29,13 @@ function Navbar() {
           <div className="flex-1 lg:flex-none">
             <Link to="/" className="hover:opacity-80 transition-opacity">
               <div className="flex items-center gap-2">
-                <ShoppingCartIcon className="size-9 text-primary" />
+                <StoreIcon className="size-9 text-primary" />
+
                 <span
                   className="font-semibold font-mono tracking-widest text-2xl
                   bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary"
                 >
-                  OnlineStore
+                  OnlineShop
                 </span>
               </div>
             </Link>
@@ -60,17 +61,21 @@ function Navbar() {
             )}
             <ThemeSelector />
             {isHomePage && (
-              <div className="indicator">
-                <ShoppingBagIcon className="size-5" />
-                <span className="indicator-item badge badge-sm badge-primary">
-                  {products.length}
-                </span>
-              </div>
+              <Link to="/cart" className="btn btn-ghost btn-circle">
+                <div className="indicator">
+                  <ShoppingBagIcon className="size-5" />
+                  {totalQuantity > 0 && (
+                    <span className="indicator-item badge badge-sm badge-primary">
+                      {totalQuantity}
+                    </span>
+                  )}
+                </div>
+              </Link>
             )}
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
 export default Navbar;

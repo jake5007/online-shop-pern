@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import axios from "axios";
 import toast from "react-hot-toast";
+import axiosInstance from "../utils/axios";
 
 const BASE_URL =
   import.meta.env.MODE === "development" ? "http://localhost:3000" : "";
@@ -17,6 +18,9 @@ export const useProductStore = create((set, get) => ({
     name: "",
     price: "",
     image: "",
+    category_id: "",
+    count_in_stock: 0,
+    description: "",
   },
 
   // offset, totalCount, and hasMore state
@@ -47,13 +51,29 @@ export const useProductStore = create((set, get) => ({
     }),
 
   setFormData: (formData) => set({ formData }),
-  resetForm: () => set({ formData: { name: "", price: "", image: "" } }),
+  resetForm: () =>
+    set({
+      formData: {
+        name: "",
+        price: "",
+        image: "",
+        category_id: "",
+        count_in_stock: 0,
+        description: "",
+      },
+    }),
   addProduct: async (e) => {
     e.preventDefault();
     set({ loading: true });
     try {
       const { formData } = get();
-      await axios.post(`${BASE_URL}/api/products`, formData);
+
+      const { data } = await axiosInstance.get("/api/csrf-token");
+      localStorage.setItem("csrfToken", data.csrfToken);
+
+      await axiosInstance.post("/api/products", formData);
+
+      set({ offset: 0, products: [], hasMore: true });
       await get().fetchProducts();
       get().resetForm();
       toast.success("Product added successfully");
@@ -115,11 +135,16 @@ export const useProductStore = create((set, get) => ({
   deleteProduct: async (id) => {
     set({ loading: true });
     try {
-      await axios.delete(`${BASE_URL}/api/products/${id}`);
-      set((prev) => ({
-        products: prev.products.filter((product) => product.id !== id),
-        error: null,
-      }));
+      const { data } = await axiosInstance.get("/api/csrf-token");
+      localStorage.setItem("csrfToken", data.csrfToken);
+
+      await axiosInstance.delete(`/api/products/${id}`);
+      // set((prev) => ({
+      //   products: prev.products.filter((product) => product.id !== id),
+      //   error: null,
+      // }));
+      set({ offset: 0, products: [], hasMore: true });
+      await get().fetchProducts();
       toast.success("Product deleted successfully");
     } catch (err) {
       console.log("Error deleting product: ", err);
@@ -148,8 +173,18 @@ export const useProductStore = create((set, get) => ({
     set({ loading: true });
     try {
       const { formData } = get();
-      const res = await axios.put(`${BASE_URL}/api/products/${id}`, formData);
-      set({ currentProduct: res.data.data });
+
+      const { data } = await axiosInstance.get("/api/csrf-token");
+      localStorage.setItem("csrfToken", data.csrfToken);
+
+      const res = await axiosInstance.put(`/api/products/${id}`, formData);
+      set({
+        currentProduct: res.data.data,
+        offset: 0,
+        products: [],
+        hasMore: true,
+      });
+      await get().fetchProducts();
       toast.success("Product updated successfully");
     } catch (err) {
       console.log("Error updating product: ", err);

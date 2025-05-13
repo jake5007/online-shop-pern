@@ -1,37 +1,42 @@
-import { useNavigate, useParams } from "react-router-dom";
-import { useProductStore } from "../store/useProductStore";
 import { useEffect } from "react";
-import { ArrowLeftIcon, SaveIcon, Trash2Icon } from "lucide-react";
+import { useParams } from "react-router-dom";
+import { useProductStore } from "../store/useProductStore";
+import { useAuthStore } from "../store/useAuthStore";
+import { useCartStore } from "../store/useCartStore";
+import { ArrowLeftIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Rating } from "../components";
+import toast from "react-hot-toast";
 
-function ProductPage() {
-  const {
-    currentProduct,
-    formData,
-    setFormData,
-    loading,
-    error,
-    fetchProduct,
-    updateProduct,
-    deleteProduct,
-  } = useProductStore();
-  const navigate = useNavigate();
+const ProductPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+
+  const { currentProduct, fetchProduct, loading, error } = useProductStore();
+  const user = useAuthStore((state) => state.user);
+  const { addToCart, loading: cartLoading } = useCartStore();
+
+  const handleAddToCart = () => {
+    if (!user) {
+      toast.error("Please log in to add items to your cart.");
+      return navigate("/login");
+    }
+    if (currentProduct.count_in_stock === 0) {
+      toast.error("This product is out of stock.");
+      return;
+    }
+
+    addToCart(currentProduct.id, 1);
+  };
 
   useEffect(() => {
     fetchProduct(id);
   }, [fetchProduct, id]);
 
-  const handleDelete = async () => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
-      await deleteProduct(id);
-      navigate("/");
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="loading loading-dots loading-xl" />
+        <span className="loading loading-dots loading-xl" />
       </div>
     );
   }
@@ -44,127 +49,81 @@ function ProductPage() {
     );
   }
 
+  if (!currentProduct) return null;
+
+  const { name, image, description, price, category_name, count_in_stock } =
+    currentProduct;
+  const inStock = count_in_stock > 0;
+
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <button className="btn btn-ghost mb-8" onClick={() => navigate("/")}>
+    <div className="container mx-auto px-4 py-10 max-w-6xl">
+      <button className="btn btn-ghost mb-8" onClick={() => navigate(-1)}>
         <ArrowLeftIcon className="size-4 mr-2" />
-        Back to Products
+        Back
       </button>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* PRODUCT IMAGE */}
-        <div className="rounded-lg overflow-hidden shadow-lg bg-base-100">
-          <img
-            src={currentProduct?.image}
-            alt={currentProduct?.name}
-            className="size-full object-cover"
-          />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        {/* IMAGE */}
+        <div className="rounded-xl overflow-hidden shadow-lg bg-base-100">
+          {image && (
+            <img src={image} alt={name} className="size-full object-cover" />
+          )}
         </div>
 
-        {/* PRODUCT FORM */}
+        {/* PRODUCT INFO */}
         <div className="card bg-base-100 shadow-lg">
-          <div className="card-body">
-            <h2 className="card-title text-2xl mb-5">Edit Product</h2>
+          <div className="card-body space-y-5 text-base-content">
+            <h2 className="card-title text-3xl font-bold">{name}</h2>
 
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                updateProduct(id);
-              }}
-              className="space-y-6"
-            >
-              {/* PRODUCT NAME */}
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text text-base font-medium">
-                    Product Name
-                  </span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter product name"
-                  className="input input-bordered w-full"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                />
-              </div>
+            <div className="badge badge-outline badge-lg capitalize py-4 px-5">
+              Category: {category_name || "N/A"}
+            </div>
 
-              {/* PRODUCT PRICE */}
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text text-base font-medium">
-                    Price
-                  </span>
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                  className="input input-bordered w-full"
-                  value={formData.price}
-                  onChange={(e) =>
-                    setFormData({ ...formData, price: e.target.value })
-                  }
-                />
-              </div>
+            <div className="text-sm opacity-80">
+              <strong className="mr-2">Status:</strong>{" "}
+              <span className={`${inStock ? "text-success" : "text-error"}`}>
+                {inStock ? "In Stock" : "Out of Stock"}
+              </span>
+            </div>
 
-              {/* PRODUCT IMAGE URL */}
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text text-base font-medium">
-                    Image URL
-                  </span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="https://example.com/image.jpg"
-                  className="input input-bordered w-full"
-                  value={formData.image}
-                  onChange={(e) =>
-                    setFormData({ ...formData, image: e.target.value })
-                  }
-                />
-              </div>
+            <p className="text-base leading-relaxed">{description}</p>
+            <Rating
+              value={currentProduct.rating}
+              numReviews={currentProduct.num_reviews}
+            />
+            <p className="text-2xl font-bold text-primary">${price}</p>
 
-              {/* FORM ACTIONS */}
-              <div className="flex justify-between mt-8">
-                <button
-                  type="button"
-                  onClick={handleDelete}
-                  className="btn btn-error"
-                >
-                  <Trash2Icon className="size-4 mr-2" />
-                  Delete Product
-                </button>
+            {/* 미래 확장용 버튼 or 리뷰 영역 */}
+            {/* <div><ReviewSection productId={id} /></div> */}
 
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={
-                    loading ||
-                    !formData.name ||
-                    !formData.price ||
-                    !formData.image
-                  }
-                >
-                  {loading ? (
-                    <span className="loading loading-dots loading-sm" />
-                  ) : (
-                    <>
-                      <SaveIcon className="size-4 mr-2" />
-                      Save Changes
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
+            <div className="mt-6">
+              <button
+                onClick={handleAddToCart}
+                disabled={
+                  !user || cartLoading || currentProduct.count_in_stock === 0
+                }
+                className="btn btn-primary w-full"
+              >
+                {cartLoading ? (
+                  <span className="loading loading-dots loading-sm" />
+                ) : currentProduct.count_in_stock === 0 ? (
+                  "Out of Stock"
+                ) : (
+                  "Add to Cart"
+                )}
+              </button>
+
+              {!user && (
+                <p className="text-sm text-warning mt-2">
+                  Please login to use the cart
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
+
 export default ProductPage;

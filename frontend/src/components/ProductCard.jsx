@@ -2,7 +2,7 @@ import { forwardRef } from "react";
 import { EditIcon, Trash2Icon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useProductStore } from "../store/useProductStore";
-import Rating from "./Rating";
+import { Rating } from ".";
 
 const ProductCard = forwardRef(({ product, isAdmin }, ref) => {
   const { deleteProduct } = useProductStore();
@@ -29,19 +29,22 @@ const ProductCard = forwardRef(({ product, isAdmin }, ref) => {
 
       <div className="card-body">
         {/* Product Info */}
-        <h2 className="card-title text-lg font-semibold">{product.name}</h2>
+        <Link
+          to={`/product/${product.id}`}
+          className="card-title text-lg font-semibold cursor-pointer hover:underline"
+        >
+          {product.name}
+        </Link>
         {/* Product Rating */}
         <Rating value={product.rating} numReviews={product.num_reviews} />
-
         <p className="text-2xl font-bold text-primary">
           ${Number(product.price).toFixed(2)}
         </p>
-
         {/* CARD ACTIONS */}
         {isAdmin && (
           <div className="card-actions justify-end items-center mt-4">
             <Link
-              to={`/product/${product.id}`}
+              to={`/product/${product.id}/edit`}
               className="btn btn-sm btn-info btn-outline"
             >
               <EditIcon className="size-4" />

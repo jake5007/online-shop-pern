@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useProductStore } from "../store/useProductStore";
 import { FilterIcon } from "lucide-react";
 
-function Filter() {
+const Filter = () => {
   const { setFilters, fetchProducts, fetchCategories, categories } =
     useProductStore();
   const [category, setCategory] = useState("");
@@ -106,5 +106,5 @@ function Filter() {
       )}
     </div>
   );
-}
+};
 export default Filter;
