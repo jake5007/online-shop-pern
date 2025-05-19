@@ -1,7 +1,7 @@
 import { create } from "zustand";
-import axios from "axios";
 import toast from "react-hot-toast";
 import axiosInstance from "../utils/axios";
+import { useCartStore } from "./useCartStore";
 
 const BASE_URL =
   import.meta.env.MODE === "development" ? "http://localhost:3000" : "";
@@ -52,6 +52,7 @@ export const useOrderStore = create((set, get) => ({
 
       get().resetForm();
       toast.success("Order placed successfully");
+      await useCartStore.getState().fetchCart();
 
       return data.orderId;
     } catch (err) {
@@ -65,7 +66,10 @@ export const useOrderStore = create((set, get) => ({
   fetchOrders: async () => {
     set({ loading: true, error: null });
     try {
-      const res = await axios.get(`${BASE_URL}/api/orders`);
+      const { data } = await axiosInstance.get("/api/csrf-token");
+      localStorage.setItem("csrfToken", data.csrfToken);
+
+      const res = await axiosInstance.get("/api/orders");
       set({ orders: res.data.data, error: null });
     } catch (err) {
       console.error("Error fetching orders: ", err);

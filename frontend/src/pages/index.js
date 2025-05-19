@@ -7,6 +7,7 @@ import CartPage from "./CartPage";
 import CheckoutPage from "./CheckoutPage";
 import OrderDetailPage from "./OrderDetailPage";
 import OrderSuccessPage from "./OrderSuccessPage";
+import MyOrdersPage from "./MyOrdersPage";
 
 export {
   HomePage,
@@ -18,4 +19,5 @@ export {
   CheckoutPage,
   OrderDetailPage,
   OrderSuccessPage,
+  MyOrdersPage,
 };

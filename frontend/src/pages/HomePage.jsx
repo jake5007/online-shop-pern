@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useProductStore } from "../store/useProductStore";
 import { useAuthStore } from "../store/useAuthStore";
 import {
-  ArrowBigUp,
+  ChevronsUpIcon,
   PackageIcon,
   PlusCircleIcon,
   RefreshCwIcon,
@@ -84,7 +84,7 @@ const HomePage = () => {
       {error && <div className="alert alert-error mb-8"> {error}</div>}
 
       {products.length === 0 && !loading && (
-        <div className="flex flex-col justifuy-center items-center h-96 space-y-4">
+        <div className="flex flex-col justify-center items-center h-96 space-y-4">
           <div className="bg-base-100 rounded-full p-6">
             <PackageIcon className="size-12" />
           </div>
@@ -103,7 +103,7 @@ const HomePage = () => {
       {/* Loading */}
       {loading && (
         <div className="flex justify-center items-center h-64">
-          <div className="loading loading-dots loading-xl" />
+          <div className="loading loading-dots loading-lg" />
         </div>
       )}
 
@@ -142,7 +142,7 @@ const HomePage = () => {
           onClick={scrollToTop}
           className="btn btn-circle btn-primary fixed bottom-8 right-8 shadow-xl opacity-60 hover:opacity-100 transition-opacity duration-300"
         >
-          <ArrowBigUp className="size-8" />
+          <ChevronsUpIcon className="size-8" />
         </button>
       )}
     </main>

@@ -1,3 +1,5 @@
+import { ClipboardListIcon, UserIcon } from "lucide-react";
+
 export const THEMES = [
   {
     name: "pastel",
@@ -63,5 +65,18 @@ export const THEMES = [
     name: "dracula",
     label: "Dracula",
     colors: ["#282A36", "#BD93F9", "#FF79C6"],
+  },
+];
+
+export const userMenuItems = [
+  {
+    label: "My Orders",
+    icon: ClipboardListIcon,
+    to: "/my-orders",
+  },
+  {
+    label: "Edit Profile",
+    icon: UserIcon,
+    to: "/profile",
   },
 ];

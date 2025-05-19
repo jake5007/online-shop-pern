@@ -14,7 +14,7 @@ const OrderSuccessPage = () => {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="loading loading-dots loading-xl" />
+        <div className="loading loading-dots loading-lg" />
       </div>
     );
   }
@@ -62,13 +62,20 @@ const OrderSuccessPage = () => {
       <div className="text-right text-lg font-bold">
         Total: ${Number(total_price).toFixed(2)}
       </div>
-
-      <button
-        className="btn btn-primary w-full sm:w-auto"
-        onClick={() => navigate("/")}
-      >
-        Go Home
-      </button>
+      <div className="flex flex-col sm:flex-row gap-5">
+        <button
+          className="btn btn-accent w-full sm:w-auto"
+          onClick={() => navigate("/my-orders")}
+        >
+          View My Orders
+        </button>
+        <button
+          className="btn btn-primary w-full sm:w-auto"
+          onClick={() => navigate("/")}
+        >
+          Go Home
+        </button>
+      </div>
     </div>
   );
 };

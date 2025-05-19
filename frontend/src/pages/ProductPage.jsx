@@ -36,7 +36,7 @@ const ProductPage = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <span className="loading loading-dots loading-xl" />
+        <span className="loading loading-dots loading-lg" />
       </div>
     );
   }

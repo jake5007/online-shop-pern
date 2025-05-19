@@ -11,6 +11,7 @@ import {
   CheckoutPage,
   OrderDetailPage,
   OrderSuccessPage,
+  MyOrdersPage,
 } from "./pages";
 import { useThemeStore } from "./store/useThemeStore";
 import { useAuthStore } from "./store/useAuthStore";
@@ -45,6 +46,8 @@ function App() {
         <Route path="/cart" element={<CartPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/order/:id" element={<OrderSuccessPage />} />
+        <Route path="/my-orders" element={<MyOrdersPage />} />
+        <Route path="/my-orders/:id" element={<OrderDetailPage />} />
       </Routes>
 
       <Toaster />
