@@ -23,7 +23,6 @@ import {
   createCarts,
   createOrders,
 } from "./schema/index.js";
-import { create } from "domain";
 
 dotenv.config();
 
@@ -36,9 +35,8 @@ const csrfProtection = csrf({
 
 const allowedOrigins = {
   development: ["http://localhost:5173"],
-  production: [""],
+  production: ["https://online-shop-pern.onrender.com/"],
 };
-//production: https://online-shop-pern.onrender.com/
 
 app.use(express.json());
 app.use(
@@ -134,8 +132,14 @@ async function initDB() {
   }
 }
 
-initDB().then(() => {
+if (process.env.NODE_ENV === "development") {
+  initDB().then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  });
+} else {
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
-});
+}
