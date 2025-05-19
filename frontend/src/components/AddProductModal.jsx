@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   DollarSignIcon,
   ImageIcon,
@@ -6,8 +7,21 @@ import {
 } from "lucide-react";
 import { useProductStore } from "../store/useProductStore";
 
-function AddProductModal() {
-  const { addProduct, formData, setFormData, loading } = useProductStore();
+const AddProductModal = () => {
+  const {
+    addProduct,
+    formData,
+    setFormData,
+    resetForm,
+    categories,
+    fetchCategories,
+    loading,
+  } = useProductStore();
+
+  useEffect(() => {
+    resetForm();
+    fetchCategories();
+  }, [resetForm, fetchCategories]);
 
   return (
     <dialog id="add_product_modal" className="modal">
@@ -20,10 +34,10 @@ function AddProductModal() {
         </form>
 
         {/* Modal Header */}
-        <h3 className="font-bold text-lg mb-8">Add New Product</h3>
+        <h3 className="font-bold text-lg mb-6">Add New Product</h3>
 
         <form onSubmit={addProduct} className="space-y-5">
-          <div className="grid gap-6">
+          <div className="grid gap-4">
             {/* PRODUCT NAME INPUT */}
             <div className="form-control">
               <label className="label">
@@ -43,6 +57,7 @@ function AddProductModal() {
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
+                  required
                 />
               </div>
             </div>
@@ -66,6 +81,7 @@ function AddProductModal() {
                   onChange={(e) =>
                     setFormData({ ...formData, price: e.target.value })
                   }
+                  required
                 />
               </div>
             </div>
@@ -92,6 +108,71 @@ function AddProductModal() {
                 />
               </div>
             </div>
+
+            {/* CATEGORY */}
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text text-base font-medium">
+                  Category
+                </span>
+              </label>
+              <select
+                className="select select-bordered w-full"
+                value={formData.category_id}
+                onChange={(e) =>
+                  setFormData({ ...formData, category_id: e.target.value })
+                }
+                required
+              >
+                <option disabled value="">
+                  Select
+                </option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* COUNT IN STOCK */}
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text text-base font-medium">
+                  Count In Stock
+                </span>
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                placeholder="0"
+                className="input input-bordered w-full"
+                value={formData.count_in_stock}
+                onChange={(e) =>
+                  setFormData({ ...formData, count_in_stock: e.target.value })
+                }
+                required
+              />
+            </div>
+
+            {/* DESCRIPTION */}
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text text-base font-medium">
+                  Description
+                </span>
+              </label>
+              <textarea
+                className="textarea textarea-bordered w-full"
+                rows={3}
+                placeholder="Enter product description"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+              />
+            </div>
           </div>
 
           {/* MODAL ACTIONS */}
@@ -103,7 +184,11 @@ function AddProductModal() {
               type="submit"
               className="btn btn-primary min-w-[120px]"
               disabled={
-                !formData.name || !formData.price || !formData.image || loading
+                !formData.name ||
+                !formData.price ||
+                !formData.image ||
+                !formData.category_id ||
+                loading
               }
             >
               {loading ? (
@@ -124,5 +209,5 @@ function AddProductModal() {
       </form>
     </dialog>
   );
-}
+};
 export default AddProductModal;
