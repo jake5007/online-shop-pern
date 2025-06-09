@@ -27,11 +27,14 @@ const AddProductModal = () => {
     <dialog id="add_product_modal" className="modal">
       <div className="modal-box">
         {/* Close Btn */}
-        <form method="dialog">
-          <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
-            X
-          </button>
-        </form>
+
+        <button
+          type="button"
+          className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+          onClick={() => document.getElementById("add_product_modal").close()}
+        >
+          X
+        </button>
 
         {/* Modal Header */}
         <h3 className="font-bold text-lg mb-6">Add New Product</h3>
@@ -177,9 +180,16 @@ const AddProductModal = () => {
 
           {/* MODAL ACTIONS */}
           <div className="modal-action">
-            <form method="dialog">
-              <button className="btn btn-ghost">Cancel</button>
-            </form>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={() =>
+                document.getElementById("add_product_modal").close()
+              }
+            >
+              Cancel
+            </button>
+
             <button
               type="submit"
               className="btn btn-primary min-w-[120px]"

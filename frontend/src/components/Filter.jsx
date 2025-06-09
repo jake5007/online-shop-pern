@@ -1,39 +1,37 @@
 import { useState, useEffect } from "react";
 import { useProductStore } from "../store/useProductStore";
+import { useUIStore } from "../store/useUIStore";
 import { FilterIcon } from "lucide-react";
 
 const Filter = () => {
   const { setFilters, fetchProducts, fetchCategories, categories } =
     useProductStore();
+  const { showFilter, toggleFilter, closeAll } = useUIStore();
   const [category, setCategory] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
 
   const applyFilters = () => {
-    setFilters({ category_id: category, minPrice, maxPrice });
+    setFilters({ category_id: category, minPrice, maxPrice, keyword: "" });
     fetchProducts();
-    setIsOpen(false);
+    closeAll();
   };
 
   return (
     <div className="relative z-10">
       {/* Filter Button */}
-      <button
-        className="btn btn-ghost btn-circle"
-        onClick={() => setIsOpen((prev) => !prev)}
-      >
+      <button className="btn btn-ghost btn-circle" onClick={toggleFilter}>
         <FilterIcon className="size-5" />
       </button>
 
       {/* Filter Option */}
-      {isOpen && (
+      {showFilter && (
         <div
-          onClick={() => setIsOpen(false)}
+          onClick={toggleFilter}
           className="fixed inset-0 bg-black bg-opacity-40 z-50 flex justify-center items-center sm:static sm:bg-transparent sm:inset-auto sm:z-auto"
         >
           <div

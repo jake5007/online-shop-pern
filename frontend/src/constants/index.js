@@ -74,9 +74,9 @@ export const userMenuItems = [
     icon: ClipboardListIcon,
     to: "/my-orders",
   },
-  {
-    label: "Edit Profile",
-    icon: UserIcon,
-    to: "/profile",
-  },
+  // {
+  //   label: "Edit Profile",
+  //   icon: UserIcon,
+  //   to: "/profile",
+  // },
 ];

@@ -2,6 +2,7 @@ import { create } from "zustand";
 import axios from "axios";
 import toast from "react-hot-toast";
 import axiosInstance from "../utils/axios";
+import getAndStoreCsrfToken from "../utils/csrf";
 
 const BASE_URL =
   import.meta.env.MODE === "development" ? "http://localhost:3000" : "";
@@ -34,6 +35,7 @@ export const useProductStore = create((set, get) => ({
     category_id: "",
     minPrice: "",
     maxPrice: "",
+    keyword: "",
   },
 
   showScrollTop: false,
@@ -68,8 +70,7 @@ export const useProductStore = create((set, get) => ({
     try {
       const { formData } = get();
 
-      const { data } = await axiosInstance.get("/api/csrf-token");
-      localStorage.setItem("csrfToken", data.csrfToken);
+      await getAndStoreCsrfToken();
 
       await axiosInstance.post("/api/products", formData);
 
@@ -97,7 +98,7 @@ export const useProductStore = create((set, get) => ({
   fetchProducts: async () => {
     set({ loading: true });
     const { limit, offset, products, filters } = get();
-    const { category_id, minPrice, maxPrice } = filters;
+    const { category_id, minPrice, maxPrice, keyword } = filters;
 
     try {
       const res = await axios.get(`${BASE_URL}/api/products`, {
@@ -107,6 +108,7 @@ export const useProductStore = create((set, get) => ({
           category_id,
           minPrice,
           maxPrice,
+          keyword,
         },
       });
       const { data: newProducts, totalCount } = res.data;
@@ -135,8 +137,7 @@ export const useProductStore = create((set, get) => ({
   deleteProduct: async (id) => {
     set({ loading: true });
     try {
-      const { data } = await axiosInstance.get("/api/csrf-token");
-      localStorage.setItem("csrfToken", data.csrfToken);
+      await getAndStoreCsrfToken();
 
       await axiosInstance.delete(`/api/products/${id}`);
       // set((prev) => ({
@@ -174,8 +175,7 @@ export const useProductStore = create((set, get) => ({
     try {
       const { formData } = get();
 
-      const { data } = await axiosInstance.get("/api/csrf-token");
-      localStorage.setItem("csrfToken", data.csrfToken);
+      await getAndStoreCsrfToken();
 
       const res = await axiosInstance.put(`/api/products/${id}`, formData);
       set({
@@ -191,6 +191,45 @@ export const useProductStore = create((set, get) => ({
       toast.error("Something went wrong");
     } finally {
       set({ loading: false });
+    }
+  },
+
+  // after adding review, to update it partially
+  updateProductInList: (updatedProduct) =>
+    set((state) => ({
+      products: state.products.map((p) =>
+        p.id === updatedProduct.id ? updatedProduct : p
+      ),
+    })),
+  // add: reviews
+  createReview: async (id, { rating, comment }) => {
+    try {
+      await getAndStoreCsrfToken();
+
+      await axiosInstance.post(`/api/products/${id}/reviews`, {
+        rating,
+        comment,
+      });
+
+      await get().fetchProduct(id);
+      const updated = get().currentProduct;
+      get().updateProductInList(updated);
+      toast.success("Review submitted successfully");
+    } catch (err) {
+      console.log("Error submitting review: ", err);
+      toast.error("Failed to submit review");
+    }
+  },
+  deleteReview: async (productId) => {
+    try {
+      await getAndStoreCsrfToken();
+
+      await axiosInstance.delete(`/api/products/${productId}/reviews`);
+      await get().fetchProduct(productId);
+      toast.success("Review deleted successfully");
+    } catch (err) {
+      console.log("Error deleting review: ", err);
+      toast.error("Failed to delete review");
     }
   },
 }));

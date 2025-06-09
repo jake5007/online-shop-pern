@@ -5,6 +5,8 @@ import ThemeSelector from "./ThemeSelector";
 import Filter from "./Filter";
 import Rating from "./Rating";
 import UserMenu from "./UserMenu";
+import SearchBar from "./SearchBar";
+import ReviewSection from "./ReviewSection";
 
 export {
   AddProductModal,
@@ -14,4 +16,6 @@ export {
   Filter,
   Rating,
   UserMenu,
+  SearchBar,
+  ReviewSection,
 };

@@ -154,7 +154,7 @@ const Navbar = () => {
             </li>
 
             {/* Edit Profile */}
-            <li>
+            {/* <li>
               <Link
                 to="/profile"
                 className="flex items-center gap-3 text-base-content hover:opacity-80"
@@ -164,7 +164,7 @@ const Navbar = () => {
                   Edit Profile
                 </span>
               </Link>
-            </li>
+            </li> */}
           </ul>
         )}
       </div>

@@ -5,7 +5,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import { useCartStore } from "../store/useCartStore";
 import { ArrowLeftIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Rating } from "../components";
+import { Rating, ReviewSection } from "../components";
 import toast from "react-hot-toast";
 
 const ProductPage = () => {
@@ -122,6 +122,8 @@ const ProductPage = () => {
           </div>
         </div>
       </div>
+      {/* Review */}
+      <ReviewSection productId={id} user={user} />
     </div>
   );
 };
