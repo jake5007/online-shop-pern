@@ -3,7 +3,7 @@ import { sql } from "../config/db.js";
 export const getProducts = async (req, res) => {
   const limit = parseInt(req.query.limit) || 6;
   const offset = parseInt(req.query.offset) || 0;
-  const { category_id, minPrice, maxPrice } = req.query;
+  const { category_id, minPrice, maxPrice, keyword } = req.query;
 
   let where = sql`WHERE 1=1`;
 
@@ -15,6 +15,9 @@ export const getProducts = async (req, res) => {
   }
   if (maxPrice) {
     where = sql`${where} AND price <= ${maxPrice}`;
+  }
+  if (keyword) {
+    where = sql`${where} AND name ILIKE '%' || ${keyword} || '%'`;
   }
 
   where = sql`${where} AND is_deleted = false`;
@@ -46,11 +49,12 @@ export const getProducts = async (req, res) => {
   }
 };
 
+// review도 같이 들고오도록
 export const getProductById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const product = await sql`
+    const [product] = await sql`
       SELECT p.*, c.id AS category_id, c.name AS category_name FROM products p
       LEFT JOIN categories c 
       ON p.category_id = c.id     
@@ -58,9 +62,28 @@ export const getProductById = async (req, res) => {
       AND p.is_deleted = false
     `;
 
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    // get reviews
+    const reviews = await sql`
+      SELECT r.id, r.rating, r.comment, r.created_at, u.name AS user_name
+      FROM reviews r
+      INNER JOIN users u ON r.user_id = u.id 
+      WHERE r.product_id = ${id}
+      ORDER BY r.created_at DESC
+    `;
+
     res.status(200).json({
       success: true,
-      data: product[0],
+      data: {
+        ...product,
+        reviews,
+      },
     });
   } catch (error) {
     console.log("Error getting product: ", error);
@@ -178,5 +201,110 @@ export const deleteProduct = async (req, res) => {
       success: false,
       message: "Server error",
     });
+  }
+};
+
+export const createProductReview = async (req, res) => {
+  const userId = req.user.id;
+  const { id: productId } = req.params;
+  const { rating, comment } = req.body;
+
+  if (!rating || rating < 1 || rating > 5) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid rating",
+    });
+  }
+
+  try {
+    const [existing] = await sql`
+      SELECT * FROM reviews
+      WHERE user_id = ${userId} AND product_id = ${productId}
+    `;
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: "You already reviewed this product",
+      });
+    }
+
+    // insert review
+    const [review] = await sql`
+      INSERT INTO reviews (user_id, product_id, rating, comment)
+      VALUES (${userId}, ${productId}, ${rating}, ${comment})
+      RETURNING *
+    `;
+
+    // update product rating
+    const [stats] = await sql`
+      SELECT 
+        COUNT(*) AS count,
+        AVG(rating)::REAL AS average
+      FROM reviews
+      WHERE product_id = ${productId}
+    `;
+
+    await sql`
+      UPDATE products
+      SET rating = ${stats.average}, num_reviews = ${stats.count}
+      WHERE id = ${productId}
+    `;
+
+    res.status(201).json({
+      success: true,
+      data: review,
+    });
+  } catch (err) {
+    console.error("Error creating review:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+export const deleteProductReview = async (req, res) => {
+  const userId = req.user.id;
+  const { id: productId } = req.params;
+
+  try {
+    const [review] = sql`
+      SELECT * FROM reviews
+      WHERE user_id = ${userId} AND product_id = ${productId}
+    `;
+
+    if (!review) {
+      return res.status(404).json({
+        success: false,
+        message: "Review not found",
+      });
+    }
+
+    await sql`
+      DELETE FROM reviews
+      WHERE user_id = ${userId} AND product_id = ${productId}
+    `;
+
+    // Recalculate product stats
+    const [stats] = sql`
+      SELECT
+        COUNT(*) AS count,
+        AVG(rating)::REAL AS average
+      FROM reviews
+      WHERE product_id = ${productId}
+    `;
+
+    await sql`
+      UPDATE products
+      SET
+        rating = COALESCE(${stats.average}, 0),
+        num_reviews = ${stats.count}
+      WHERE id = ${productId}
+    `;
+
+    res.status(200).json({
+      success: true,
+      message: "Review deleted successfully",
+    });
+  } catch (err) {
+    console.error("Error deleting review:", err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };

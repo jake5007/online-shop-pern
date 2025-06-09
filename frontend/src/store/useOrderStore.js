@@ -1,10 +1,11 @@
 import { create } from "zustand";
 import toast from "react-hot-toast";
 import axiosInstance from "../utils/axios";
+import getAndStoreCsrfToken from "../utils/csrf";
 import { useCartStore } from "./useCartStore";
 
-const BASE_URL =
-  import.meta.env.MODE === "development" ? "http://localhost:3000" : "";
+// const BASE_URL =
+//   import.meta.env.MODE === "development" ? "http://localhost:3000" : "";
 
 export const useOrderStore = create((set, get) => ({
   orders: [],
@@ -42,8 +43,7 @@ export const useOrderStore = create((set, get) => ({
       const { formData } = get();
       const { shipping, paymentMethod } = formData;
 
-      const { data: csrf } = await axiosInstance.get("/api/csrf-token");
-      localStorage.setItem("csrfToken", csrf.csrfToken);
+      await getAndStoreCsrfToken();
 
       const { data } = await axiosInstance.post("/api/orders", {
         shippingAddress: shipping,
@@ -66,8 +66,7 @@ export const useOrderStore = create((set, get) => ({
   fetchOrders: async () => {
     set({ loading: true, error: null });
     try {
-      const { data } = await axiosInstance.get("/api/csrf-token");
-      localStorage.setItem("csrfToken", data.csrfToken);
+      await getAndStoreCsrfToken();
 
       const res = await axiosInstance.get("/api/orders");
       set({ orders: res.data.data, error: null });
@@ -83,8 +82,7 @@ export const useOrderStore = create((set, get) => ({
   fetchOrder: async (id) => {
     set({ loading: true, error: null });
     try {
-      const { data } = await axiosInstance.get("/api/csrf-token");
-      localStorage.setItem("csrfToken", data.csrfToken);
+      await getAndStoreCsrfToken();
 
       const res = await axiosInstance.get(`/api/orders/${id}`);
       set({ currentOrder: res.data.data, error: null });

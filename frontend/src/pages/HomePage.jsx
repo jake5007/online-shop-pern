@@ -7,7 +7,7 @@ import {
   PlusCircleIcon,
   RefreshCwIcon,
 } from "lucide-react";
-import { ProductCard, AddProductModal, Filter } from "../components";
+import { ProductCard, AddProductModal, Filter, SearchBar } from "../components";
 
 const HomePage = () => {
   const {
@@ -72,6 +72,7 @@ const HomePage = () => {
         )}
 
         <div className="flex items-center space-x-4 ml-auto">
+          <SearchBar />
           <Filter />
           <button className="btn btn-ghost btn-circle" onClick={fetchProducts}>
             <RefreshCwIcon className="size-5" />

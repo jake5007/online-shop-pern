@@ -52,7 +52,13 @@ const Rating = ({ value, numReviews }) => {
         )}
       </span>
       <span className="rating-text ml-2">
-        ( {numReviews > 0 ? `${numReviews} reviews` : "No reviews"} )
+        ({" "}
+        {numReviews > 1
+          ? `${numReviews} reviews`
+          : numReviews > 0
+          ? `${numReviews} review`
+          : "No reviews"}{" "}
+        )
       </span>
     </div>
   );

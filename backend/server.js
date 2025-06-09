@@ -22,6 +22,7 @@ import {
   createUsers,
   createCarts,
   createOrders,
+  createReviews,
 } from "./schema/index.js";
 import { create } from "domain";
 
@@ -127,6 +128,7 @@ async function initDB() {
     await createUsers(sql);
     await createCarts(sql);
     await createOrders(sql);
+    await createReviews(sql);
 
     console.log("Database initialized successfully");
   } catch (error) {

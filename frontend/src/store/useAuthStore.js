@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import toast from "react-hot-toast";
 import axiosInstance from "../utils/axios";
+import getAndStoreCsrfToken from "../utils/csrf";
 import { useCartStore } from "./useCartStore";
 
 // const BASE_URL =
@@ -15,8 +16,7 @@ export const useAuthStore = create((set) => ({
     try {
       set({ loading: true, error: null });
 
-      const { data } = await axiosInstance.get("/api/csrf-token");
-      localStorage.setItem("csrfToken", data.csrfToken);
+      await getAndStoreCsrfToken();
 
       const res = await axiosInstance.post("/api/auth/register", {
         name,
@@ -38,8 +38,7 @@ export const useAuthStore = create((set) => ({
     try {
       set({ loading: true, error: null });
 
-      const { data } = await axiosInstance.get("/api/csrf-token");
-      localStorage.setItem("csrfToken", data.csrfToken);
+      await getAndStoreCsrfToken();
 
       const res = await axiosInstance.post("/api/auth/login", {
         email,
@@ -58,8 +57,7 @@ export const useAuthStore = create((set) => ({
   },
   logout: async () => {
     try {
-      const { data } = await axiosInstance.get("/api/csrf-token");
-      localStorage.setItem("csrfToken", data.csrfToken);
+      await getAndStoreCsrfToken();
 
       await axiosInstance.post("/api/auth/logout");
 
